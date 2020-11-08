@@ -4,6 +4,8 @@
 #include <iostream>
 #include <ctime>
 #include <vector> 
+
+#include "DHeap.cpp"
 using namespace std;
 
 int** generateGrapth(int n, float d, int upperBoundWeight, vector<vector<int>>&  edgesStore)
@@ -175,6 +177,14 @@ void mspKruskal(vector<vector<int>>& ET, vector<vector<int>>& E, int n) {
     }
 }
 
+void mspPrim(int n) {
+    int* used = new int[n];
+    for (int i = 0; i < n; i++) {
+        used[i] = 0;
+    }
+
+}
+
 int main()
 {
     vector<vector<int>> edgesStore;
@@ -190,12 +200,28 @@ int main()
     int** grapthMatrix;
     int** minOstMatrix;
     grapthMatrix, minOstMatrix= generateGrapth(N, d, UPPER, edgesStore);
+
+    //** KRUSKAL
+
     mspKruskal(ostEdgesStore, edgesStore, N);
+
+    //** PRIM
+
+    vector<vector<DHeapItem>> grapth;
+    for (int i = 0; i < N; i++) {
+        for (int j = i; j < N; j++) {
+            if (grapthMatrix[i][j] > 0) {
+                DHeapItem tmp(i, j, grapthMatrix[i][j]);
+                grapth[i].push_back(tmp);
+            }
+        }
+    }
     system("pause");
     return 0;
 
 }
 
+// d-heap
 
 
 // Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"
