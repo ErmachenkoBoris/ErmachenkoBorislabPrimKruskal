@@ -48,21 +48,24 @@ public:
 	int getMinChildIndex(int i) {
 		int leftChild = getLeftChildIndex(i);
 		int rightChild = getRightChildIndex(i);
+		if (leftChild == -1 || rightChild == -1) {
+			return -1;
+		}
 		int min = store[leftChild].weight;
 		int minIndex = leftChild;
 		for (int i = leftChild + 1; i <= rightChild; i++) {
-			if (min < store[i].weight) {
+			if (min > store[i].weight) {
 				min = store[i].weight;
 				minIndex = i;
 			}
 		}
 		return minIndex;
 	}
-	int getParentIndex(int i) {
+	int getParentIndex(int i) {              
 		if (i == 0) {
 			return -1;
 		}
-		return (i - 1) % d;
+		return floor((i - 1) / d);
 	}
 	void diving(int i) {
 		int j1 = i;
@@ -77,7 +80,10 @@ public:
 	void emersion(int i) {
 		int j1 = i;
 		int j2 = getParentIndex(i);
-		while (j2 != -1 and store[j1].weight > store[j2].weight) {
+		while (j2 != -1 and store[j1].weight < store[j2].weight) {
+			//DHeapItem tmp = store[j1];
+			//store[j1] = store[j2];
+			//store[j2] = tmp;
 			swap(store[j1], store[j2]);
 			j1 = j2;
 			j2 = getParentIndex(j1);
@@ -99,14 +105,19 @@ public:
 	}
 	DHeapItem pop() {
 		swap(store[0], store[store.size() - 1]);
-		diving(0);
 		DHeapItem heapItemLast = store[store.size() - 1];
 		store.pop_back();
+		diving(0);
+		
 		return heapItemLast;
 	}
 	void deleteItem(int i) {
-		decreaseKey(i, BIGNUMBER);
+		decreaseKey(i, 1000000);
 		pop();
+	}
+
+	int size() {
+		return store.size();
 	}
 
 

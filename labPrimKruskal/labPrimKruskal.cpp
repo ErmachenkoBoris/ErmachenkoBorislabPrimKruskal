@@ -8,15 +8,15 @@
 #include "DHeap.cpp"
 using namespace std;
 
-int** generateGrapth(int n, float d, int upperBoundWeight, vector<vector<int>>&  edgesStore)
+int** generateGrapth(int n, float d, int upperBoundWeight, vector<vector<int>>&  edgesStore, int ** grapthMatrix, int** minOstMatrix)
 {
-    //srand(time(0));
+    srand(time(0));
     int maxCountOfEdge = n * (n - 1) / 2;
 
     int countOfEdge = int(d * maxCountOfEdge);
 
-    int** grapthMatrix = new int* [n];
-    int** minOstMatrix = new int* [n];
+    //int** grapthMatrix = new int* [n];
+    //int** minOstMatrix = new int* [n];
 
     int count = n;
 
@@ -26,10 +26,10 @@ int** generateGrapth(int n, float d, int upperBoundWeight, vector<vector<int>>& 
 
     //vector<vector<int>> edgesStore;
 
-    for (int i = 0; i < n; i++) {
-        grapthMatrix[i] = new int[n];
-        minOstMatrix[i] = new int[n];
-    }
+   // for (int i = 0; i < n; i++) {
+    //    grapthMatrix[i] = new int[n];
+    //    minOstMatrix[i] = new int[n];
+    //}
 
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
@@ -113,7 +113,8 @@ int** generateGrapth(int n, float d, int upperBoundWeight, vector<vector<int>>& 
         cout << '\n';
     }
     
-    return grapthMatrix, minOstMatrix;
+    // return grapthMatrix, minOstMatrix;
+    return grapthMatrix;
 }
 
 /*separated sets*/
@@ -177,10 +178,63 @@ void mspKruskal(vector<vector<int>>& ET, vector<vector<int>>& E, int n) {
     }
 }
 
-void mspPrim(int n) {
+void mspPrim(int n, int** grapthMatrix) {
+    vector<vector<DHeapItem>> grapth;
+    grapth.reserve(n);
+    for (int i = 0; i < n; i++) {
+        vector<DHeapItem> tmpVector;
+        for (int j = 0; j < n; j++) {
+            // grapth.push_back({});
+            if (grapthMatrix[i][j] > 0) {
+                DHeapItem tmp(i, j, grapthMatrix[i][j]);
+                tmpVector.push_back(tmp);
+                
+            }
+        }
+        if (tmpVector.size() > 0) {
+            grapth.push_back(tmpVector);
+        }
+        else {
+            grapth.push_back({});
+        }
+        
+    }
+    DHeap heap(3);
     int* used = new int[n];
     for (int i = 0; i < n; i++) {
         used[i] = 0;
+    }
+    int u = 0;
+    used[u] = 1;
+    for (int i = 0; i < grapth[u].size(); i++) {
+        //DHeapItem tmp(u, grapth[u][i].edgeSecond, grapth[u][i].weight);
+       // cout << grapth[u][i].edgeFirst << " " << grapth[u][i].edgeSecond << " " << grapth[u][i].weight << " " << "\n";
+        heap.push(u, grapth[u][i].edgeSecond, grapth[u][i].weight);
+    }
+
+    cout << "grapthsize " << grapth.size()<<" ";
+    int mt = 0;
+    while (mt<n-1)
+    {
+        DHeapItem tmp = heap.pop();
+        u = tmp.edgeSecond;
+        if (used[u] == 1) {
+            continue;
+        }
+        int w = tmp.weight;
+        mt++;
+        cout << "\n";
+        cout << tmp.edgeFirst<<" "<<tmp.edgeSecond << " " << tmp.weight << " "<<"\n";
+        used[u] = 1;
+        cout << "- " << u;
+        for (int i = 0; i < grapth[u].size(); i++) {
+            if (used[grapth[u][i].edgeSecond] != 1) {
+                heap.push(u, grapth[u][i].edgeSecond, grapth[u][i].weight);
+            }
+            //DHeapItem tmp(u, grapth[u][i].edgeSecond, grapth[u][i].weight);
+            
+        }
+
     }
 
 }
@@ -197,9 +251,18 @@ int main()
     cin >> d;
     cin >> UPPER;
     cout << "start generate grapth\n";
-    int** grapthMatrix;
-    int** minOstMatrix;
-    grapthMatrix, minOstMatrix= generateGrapth(N, d, UPPER, edgesStore);
+    //int** grapthMatrix = new int*[N];
+    //int** minOstMatrix;
+    int** grapthMatrix = new int* [N];
+    int** minOstMatrix = new int* [N];
+
+    //vector<vector<int>> edgesStore;
+
+    for (int i = 0; i < N; i++) {
+        grapthMatrix[i] = new int[N];
+        minOstMatrix[i] = new int[N];
+    }
+    generateGrapth(N, d, UPPER, edgesStore, grapthMatrix, minOstMatrix);
 
     //** KRUSKAL
 
@@ -207,7 +270,7 @@ int main()
 
     //** PRIM
 
-    vector<vector<DHeapItem>> grapth;
+    /*vector<vector<DHeapItem>> grapth;
     for (int i = 0; i < N; i++) {
         for (int j = i; j < N; j++) {
             if (grapthMatrix[i][j] > 0) {
@@ -215,7 +278,9 @@ int main()
                 grapth[i].push_back(tmp);
             }
         }
-    }
+    }*/
+
+    mspPrim(N, grapthMatrix);
     system("pause");
     return 0;
 
