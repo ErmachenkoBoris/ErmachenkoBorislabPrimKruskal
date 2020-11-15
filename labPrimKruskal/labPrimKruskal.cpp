@@ -3,10 +3,11 @@
 #include <iostream>
 #include <ctime>
 #include <vector> 
+#include <ctime>
 #include "DHeap.cpp"
 using namespace std;
 
-int** generateGrapth(int n, float d, int upperBoundWeight, vector<vector<int>>&  edgesStore, int ** grapthMatrix, int** minOstMatrix)
+int** generateGrapth(int n, float d, int upperBoundWeight, vector<vector<int>>&  edgesStore, vector<vector<int>>& minOstedgesStore, int ** grapthMatrix, int** minOstMatrix)
 {
     srand(time(0));
     int maxCountOfEdge = n * (n - 1) / 2;
@@ -47,6 +48,7 @@ int** generateGrapth(int n, float d, int upperBoundWeight, vector<vector<int>>& 
             grapthMatrix[i][j] = 1;
             grapthMatrix[j][i] = 1;
             minOstMatrix[i][j] = minOstMatrix[j][i] = 1;
+            minOstedgesStore.push_back({ i, j, 1 });
             edgesStore.push_back({ i, j, 1 });
             int tmpBind = vartFree[indexI];
             auto iter = vartFree.cbegin();
@@ -84,6 +86,7 @@ int** generateGrapth(int n, float d, int upperBoundWeight, vector<vector<int>>& 
         swap(edgesStore[i], edgesStore[minIndex]);
     }
 
+    /*
     cout << '\n';
 
     for (int i = 0; i < edgesStore.size(); i++) {
@@ -97,7 +100,8 @@ int** generateGrapth(int n, float d, int upperBoundWeight, vector<vector<int>>& 
             cout << grapthMatrix[i][j]<<" ";
         }
         cout << '\n';
-    }
+    }*/
+
     return grapthMatrix;
 }
 
@@ -138,6 +142,7 @@ int findRoot(int* p, int* r, int x) {
 }
 
 void mspKruskal(vector<vector<int>>& ET, vector<vector<int>>& E, int n) {
+    int start_time = clock();
     int* p = new int[n];
     int* r = new int[n];
     int mt = 0;
@@ -152,11 +157,27 @@ void mspKruskal(vector<vector<int>>& ET, vector<vector<int>>& E, int n) {
             ET.push_back(E[i]);
         }
     }
+    int end_time = clock();
     cout << "\n";
     cout << "ANSWER KRUSKAL" << "\n";
+    cout << "time: " << end_time - start_time<<"\n";
+    bool allOne = true;
     for (int i = 0; i < ET.size(); i++) {
-        cout << ET[i][0] << " "<<ET[i][1] << " "<<ET[i][2] << " " << "\n";
+        if (ET[i][2] > 1) {
+            allOne = false;
+        }
+        /*
+        if (ET[i][0] > ET[i][1]) {
+            cout << ET[i][0] << " " << ET[i][1] << " " << ET[i][2] << " " << "\n";
+        }
+        else {
+            cout << ET[i][1]  << " " << ET[i][0] << " " << ET[i][2] << " " << "\n";
+        }  
+        */
     }
+
+    cout << " length " << ET.size() << "\n";
+    cout << " allOne " << allOne << "\n";
 
 }
 
@@ -180,6 +201,9 @@ void mspPrim(int n, int** grapthMatrix) {
         }
         
     }
+
+    int start_time = clock();
+
     DHeap heap(3);
     int* used = new int[n];
     for (int i = 0; i < n; i++) {
@@ -210,42 +234,131 @@ void mspPrim(int n, int** grapthMatrix) {
             }
         }
     }
+    int end_time = clock();
     cout << "\n";
     cout << "ANSWER PRIM" << "\n";
+    cout << "time: " << end_time - start_time << "\n";
+
+    bool allOne = true;
     for (int i = 0; i < minTree.size(); i++) {
-        cout << minTree[i].edgeFirst << " " << minTree[i].edgeSecond << " " << minTree[i].weight << " " << "\n";
+        if (minTree[i].weight > 1) {
+            allOne = false;
+        }
+        /*
+        if (minTree[i].edgeFirst > minTree[i].edgeSecond) {
+            cout << minTree[i].edgeFirst << " " << minTree[i].edgeSecond << " " << minTree[i].weight << "\n";
+        }  else {
+            cout << minTree[i].edgeSecond << " " << minTree[i].edgeFirst << " " << minTree[i].weight << "\n";
+        }
+        */
     }
+    cout << " length " << minTree.size() << "\n";
+    cout << " allOne " << allOne << "\n";
+
 }
 
 int main()
 {
     vector<vector<int>> edgesStore;
-    vector<vector<int>> ostEdgesStore;
+    vector<vector<int>> ostKruskalEdgesStore;
+    vector<vector<int>> minOstedgesStore;
     int N = 0;
     float d = 0.5;
-    int UPPER = 0;
+    int UPPER = 500;
+
+    /*
     cout << "Write V, d, upper bound of weight\n";
     cin >> N;
     cin >> d;
     cin >> UPPER;
     cout << "start generate grapth\n";
-    int** grapthMatrix = new int* [N];
-    int** minOstMatrix = new int* [N];
+    */
 
-    for (int i = 0; i < N; i++) {
-        grapthMatrix[i] = new int[N];
-        minOstMatrix[i] = new int[N];
+    double density[6] = { 0.1, 0.2, 0.4, 0.6, 0.8, 1 };
+    int numberOfVert[6] = { 100, 200, 300, 400, 500, 600 };
+
+    for (int j = 0; j < 6; j++) {
+        for (int i = 0; i < 6; i++) {
+            
+            int N = numberOfVert[j];
+            int d = density[i];
+            cout << "\n" << "number of vertices=" << N << "\n";
+            cout << "density " << d << "\n";
+            int** grapthMatrix = new int* [N];
+            int** minOstMatrix = new int* [N];
+
+            for (int i = 0; i < N; i++) {
+                grapthMatrix[i] = new int[N];
+                minOstMatrix[i] = new int[N];
+            }
+            generateGrapth(N, d, UPPER, edgesStore, minOstedgesStore, grapthMatrix, minOstMatrix);
+
+            // Correct ost
+
+            bool allOne = true;
+
+            for (int i = 0; i < minOstedgesStore.size(); i++) {
+                if (minOstedgesStore[i][2] > 1) {
+                    allOne = false;
+                }
+                /*
+                if (minOstedgesStore[i][0] > minOstedgesStore[i][1]) {
+                  cout << minOstedgesStore[i][0] << " " << minOstedgesStore[i][1] << " " << minOstedgesStore[i][2] << " " << "\n";
+                }
+                else {
+                  cout << minOstedgesStore[i][1] << " " << minOstedgesStore[i][0] << " " << minOstedgesStore[i][2] << " " << "\n";
+                }*/
+            }
+
+            cout << " length " << minOstedgesStore.size() << "\n";
+            cout << " allOne " << allOne << "\n";
+
+
+            //** KRUSKAL
+
+            mspKruskal(ostKruskalEdgesStore, edgesStore, N);
+
+            //** PRIM
+
+            mspPrim(N, grapthMatrix);
+        }
     }
-    generateGrapth(N, d, UPPER, edgesStore, grapthMatrix, minOstMatrix);
+
+
+
+
+    // Correct ost
+    /*
+    bool allOne = true;
+
+    for (int i = 0; i < minOstedgesStore.size(); i++) {
+        if (minOstedgesStore[i][2] > 1) {
+            allOne = false;
+        }
+        if (minOstedgesStore[i][0] > minOstedgesStore[i][1]) {
+          cout << minOstedgesStore[i][0] << " " << minOstedgesStore[i][1] << " " << minOstedgesStore[i][2] << " " << "\n";
+        }
+        else {
+          cout << minOstedgesStore[i][1] << " " << minOstedgesStore[i][0] << " " << minOstedgesStore[i][2] << " " << "\n";
+        }
+    }
+
+    cout << " length " << minOstedgesStore.size() << "\n";
+    cout << " allOne " << allOne << "\n";
+
 
     //** KRUSKAL
 
-    mspKruskal(ostEdgesStore, edgesStore, N);
+    mspKruskal(ostKruskalEdgesStore, edgesStore, N);
 
     //** PRIM
 
     mspPrim(N, grapthMatrix);
+
+
     system("pause");
+
+    */
     return 0;
 
 }
